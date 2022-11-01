@@ -1,19 +1,26 @@
-from mouse import click
-from time import sleep
+from types import FunctionType
 import keyboard
+import mouse 
+import time
+import threading
 
-shouldClick = False
-keyRelease = True
-clicks_per_second = 60
+def click(delay: time.time) -> None:
+    while True:
+        mouse.click()
+        time.sleep(delay)
 
-while True:
-    if keyboard.is_pressed('0') and keyRelease:
-        keyRelease = False
-        shouldClick = not shouldClick
-    if not keyboard.is_pressed('0'):
-        keyRelease = True
-    if keyboard.is_pressed('esc'):
-        break
-    if shouldClick:
-        click('left')
-        sleep(1/clicks_per_second)
+def wait_for_keypress(keypress: str) -> None:
+    keyboard.wait(keypress)
+    return
+
+def run_script(func: FunctionType, key: str, *args) -> None:
+    listener = threading.Thread(target=wait_for_keypress, args=(key,))
+    trainer = threading.Thread(target=func, args=(args), daemon = True)#, lambda: stop_thread))
+    listener.start()
+    trainer.start()
+    listener.join()
+    return
+
+if __name__=="__main__":
+    run_script(click, "space")
+    print("Done")
